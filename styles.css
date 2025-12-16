@@ -1,0 +1,192 @@
+/**
+ * KickClient - Custom Styles
+ * Additional styling for injected UI components
+ */
+
+/* Global styling adjustments for Kick */
+body {
+    position: relative;
+}
+
+/* Improve button visibility in Kick's player */
+.kickclient-record-btn {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* Modal transitions */
+.kickclient-modal-overlay {
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.kickclient-modal {
+    animation: scaleIn 0.2s ease;
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Quality option hover effects */
+.kickclient-quality-option {
+    position: relative;
+    overflow: hidden;
+}
+
+.kickclient-quality-option::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(83, 252, 24, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.kickclient-quality-option:hover::after {
+    left: 100%;
+}
+
+/* Settings button glow effect */
+.kickclient-settings-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+.kickclient-settings-btn::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, #53FC18, #9147FF, #53FC18);
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.kickclient-settings-btn:hover::before {
+    opacity: 1;
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Recording indicator in controls */
+.kickclient-record-btn.recording::before {
+    content: '●';
+    color: #FF4444;
+    margin-right: 4px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* Notification styling */
+.kickclient-notification {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+}
+
+.kickclient-notification::before {
+    font-size: 20px;
+}
+
+.kickclient-notification.success::before {
+    content: '✓';
+    color: #53FC18;
+}
+
+.kickclient-notification.error::before {
+    content: '✗';
+    color: #FF4444;
+}
+
+.kickclient-notification.info::before {
+    content: 'ℹ';
+    color: #9147FF;
+}
+
+/* Modal input field styling */
+.kickclient-modal input[type="text"] {
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.kickclient-modal input[type="text"]:focus {
+    border-color: #9147FF;
+    box-shadow: 0 0 10px rgba(145, 71, 255, 0.3);
+}
+
+/* Scrollbar styling for modal content */
+.kickclient-modal::-webkit-scrollbar {
+    width: 8px;
+}
+
+.kickclient-modal::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.kickclient-modal::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #53FC18, #9147FF);
+    border-radius: 4px;
+}
+
+/* Progress bar for downloads/recordings */
+.kickclient-progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 12px;
+}
+
+.kickclient-progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #53FC18, #9147FF);
+    transition: width 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .kickclient-modal {
+        min-width: 280px;
+        padding: 16px;
+    }
+    
+    .kickclient-record-btn span {
+        display: none;
+    }
+    
+    .kickclient-record-btn {
+        padding: 8px;
+    }
+    
+    .kickclient-settings-btn {
+        width: 40px;
+        height: 40px;
+    }
+}
