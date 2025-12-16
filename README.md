@@ -1,95 +1,176 @@
-# Kelle KickClient
+# 🎮 Kelle KickClient
 
-<p align="center">
-  <img src="assets/icon.png" alt="KickClient Logo" width="128" height="128">
-</p>
+<div align="center">
 
-A specialized desktop client for [Kick.com](https://kick.com) with live DVR recording, VOD downloading, and dynamic theming capabilities.
+![KickClient Logo](assets/icon.png)
 
-## ✨ Features
+**A powerful desktop client for Kick.com with live DVR recording & dynamic theming**
 
-- **🔴 Live DVR Recording** - Record live streams in real-time with quality selection
-- **📥 VOD Downloading** - Download past broadcasts and clips
-- **🎨 Dynamic Theming** - Customizable text watermark overlay
-- **🔌 Seamless Integration** - Native-looking controls injected into Kick's player
-- **🔄 Auto-Reconnect** - Automatic reconnection on stream drops
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Mac%20%7C%20Linux-blueviolet.svg)](#)
+[![Electron](https://img.shields.io/badge/electron-v39-47848F.svg?logo=electron)](https://www.electronjs.org/)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18-339933.svg?logo=node.js)](https://nodejs.org/)
 
-## 🚀 Quick Start
+[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Building](#-building) • [Contributing](#-contributing)
+
+</div>
+
+---
+
+## ⚡ Features
+
+<table>
+<tr>
+<td width="50%">
+
+### 🔴 Live DVR Recording
+Record live streams in real-time with quality selection. Never miss a moment!
+
+### 📥 VOD Downloading  
+Download past broadcasts and clips directly to your device.
+
+</td>
+<td width="50%">
+
+### 🎨 Dynamic Theming
+Customizable text watermark overlay with SVG-based pattern generation.
+
+### 🔄 Auto-Reconnect
+Automatic reconnection on stream drops - seamless recording experience.
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🚀 Installation
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or later)
-- [FFmpeg](https://ffmpeg.org/) installed and accessible in PATH
+| Requirement | Version |
+|-------------|---------|
+| [Node.js](https://nodejs.org/) | v18+ |
+| [FFmpeg](https://ffmpeg.org/) | Latest |
 
-### Installation
+### Quick Start
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/kelle-kickclient.git
+git clone https://github.com/kellecore/kelle-kickclient.git
 cd kelle-kickclient
 
 # Install dependencies
 npm install
 
-# Start the application
+# Launch the app
 npm start
 ```
 
-### Building
-
-```bash
-# Build for Windows (Portable)
-npm run build:win
-
-# Build for macOS
-npm run build:mac
-
-# Build for Linux
-npm run build:linux
-```
-
-Built executables will be in the `dist/` folder.
+---
 
 ## 🎮 Usage
 
-1. Launch the application
-2. Navigate to any Kick.com channel
-3. Click the **Record** button in the player controls
-4. Select your desired quality
-5. Recording will be saved to your Downloads folder
+<table>
+<tr>
+<td>
 
-### Settings
+**1️⃣** Launch the application
 
-Click the ⚙️ button in the bottom-right corner to customize:
-- Watermark text overlay
+**2️⃣** Navigate to any Kick.com channel
 
-## 🏗️ Project Structure
+**3️⃣** Click the **Record** button in player controls
 
-```
-kelle-kickclient/
-├── main.js          # Electron main process
-├── preload.js       # IPC bridge and UI injection
-├── renderer.js      # UI logic and theming
-├── styles.css       # Custom styles
-├── assets/
-│   └── icon.png     # Application icon
-└── package.json     # Project configuration
-```
+**4️⃣** Select your desired quality
 
-## 🛠️ Technologies
+**5️⃣** Recording saves to Downloads folder
 
-- **Electron** - Desktop application framework
-- **fluent-ffmpeg** - FFmpeg wrapper for Node.js
-- **electron-builder** - Build and distribute Electron apps
+</td>
+<td>
 
-## 📝 License
+### ⚙️ Settings
 
-MIT License - see [LICENSE](LICENSE) for details.
+Click the gear icon (⚙️) in the bottom-right corner to customize:
 
-## 🤝 Contributing
+- 📝 Watermark text overlay
+- 🎨 Theme customization
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+</td>
+</tr>
+</table>
 
 ---
 
-<p align="center">Made with 💚 by kelle</p>
+## 🏗️ Building
+
+Build portable executables for distribution:
+
+```bash
+# Windows (Portable + Installer)
+npm run build:win
+
+# macOS
+npm run build:mac
+
+# Linux
+npm run build:linux
+```
+
+> 📁 Built files will be in the `dist/` folder
+
+---
+
+## 📂 Project Structure
+
+```
+kelle-kickclient/
+├── 🎯 main.js          # Electron main process
+├── 🔌 preload.js       # IPC bridge & UI injection  
+├── 🎨 renderer.js      # UI logic & theming
+├── 💅 styles.css       # Custom styles
+├── 📁 assets/
+│   └── 🖼️ icon.png     # Application icon
+└── 📦 package.json     # Project configuration
+```
+
+---
+
+## 🛠️ Technologies
+
+<div align="center">
+
+| Technology | Purpose |
+|:----------:|:--------|
+| ![Electron](https://img.shields.io/badge/-Electron-47848F?style=flat-square&logo=electron&logoColor=white) | Desktop application framework |
+| ![Node.js](https://img.shields.io/badge/-Node.js-339933?style=flat-square&logo=node.js&logoColor=white) | Runtime environment |
+| ![FFmpeg](https://img.shields.io/badge/-FFmpeg-007808?style=flat-square&logo=ffmpeg&logoColor=white) | Video processing |
+
+</div>
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to:
+
+1. 🍴 Fork the repository
+2. 🌿 Create a feature branch (`git checkout -b feature/amazing`)
+3. 💾 Commit changes (`git commit -m 'Add amazing feature'`)
+4. 📤 Push to branch (`git push origin feature/amazing`)
+5. 🎉 Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+**Made with 💚 by [kelle](https://github.com/kellecore)**
+
+⭐ Star this repo if you find it useful!
+
+</div>

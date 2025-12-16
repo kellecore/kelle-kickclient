@@ -33,3 +33,7 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Push scripts (local only)
+push_to_github.bat
+github_push.bat
