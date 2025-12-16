@@ -10,9 +10,11 @@
     let currentStreamUrl = null;
     let isRecording = false;
     let recordButton = null;
+    let settingsBtn = null;
     let watermarkText = 'kelle';
     let discordRpcMode = 'off';
     let customDiscordStatus = 'Kick izliyor';
+    let settingsHidden = false;
 
     // Icons
     const ICONS = {
@@ -29,6 +31,7 @@
         observePlayerControls();
         createSettingsButton();
         setupEventListeners();
+        observeFullscreen();
     }
 
     // Load user settings
@@ -38,50 +41,105 @@
             watermarkText = settings.watermarkText || 'kelle';
             discordRpcMode = settings.discordRpcMode || 'off';
             customDiscordStatus = settings.customDiscordStatus || 'Kick izliyor';
+            settingsHidden = settings.settingsHidden || false;
+            if (settingsBtn) {
+                settingsBtn.style.display = settingsHidden ? 'none' : 'flex';
+            }
         } catch (error) {
             console.error('KickClient: Error loading settings', error);
         }
     }
 
-    // Observe DOM for player controls
+    // Observe fullscreen and theater mode changes
+    function observeFullscreen() {
+        // Watch for fullscreen changes
+        document.addEventListener('fullscreenchange', updateSettingsVisibility);
+        document.addEventListener('webkitfullscreenchange', updateSettingsVisibility);
+
+        // Also observe DOM for theater mode class changes
+        const observer = new MutationObserver(() => {
+            updateSettingsVisibility();
+        });
+
+        observer.observe(document.body, {
+            attributes: true,
+            attributeFilter: ['class'],
+            subtree: true
+        });
+
+        // Check periodically for theater mode
+        setInterval(updateSettingsVisibility, 1000);
+    }
+
+    function updateSettingsVisibility() {
+        if (!settingsBtn || settingsHidden) return;
+
+        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
+        const isTheaterMode = document.querySelector('[class*="theater"]') ||
+            document.querySelector('[class*="Theatre"]') ||
+            document.body.classList.contains('theater-mode');
+
+        if (isFullscreen || isTheaterMode) {
+            settingsBtn.style.opacity = '0';
+            settingsBtn.style.pointerEvents = 'none';
+        } else {
+            settingsBtn.style.opacity = '1';
+            settingsBtn.style.pointerEvents = 'auto';
+        }
+    }
+
+    // Observe DOM for player controls - more aggressive search
     function observePlayerControls() {
-        const observer = new MutationObserver((mutations) => {
-            const playerControls = document.querySelector('[class*="player-controls"]') ||
-                document.querySelector('[class*="vjs-control-bar"]') ||
-                document.querySelector('.video-player__controls') ||
-                document.querySelector('[data-testid="player-controls"]');
+        const findAndInjectButton = () => {
+            // Kick.com specific selectors
+            const selectors = [
+                '[class*="bmpui-ui-controlbar"]',
+                '[class*="player-controls"]',
+                '[class*="vjs-control-bar"]',
+                '.video-player__controls',
+                '[data-testid="player-controls"]',
+                '#player-container [class*="controlbar"]',
+                '#player-container [class*="control-bar"]',
+                '[class*="bmpui-container-wrapper"] [class*="bmpui-ui-controlbar"]',
+                'div[class*="Controls"]',
+                'div[class*="controls"]'
+            ];
 
-            if (playerControls && !playerControls.querySelector('.kickclient-record-btn')) {
-                injectRecordButton(playerControls);
-            }
-
-            const kickPlayer = document.querySelector('#player-container') ||
-                document.querySelector('[class*="bmpui-ui-container"]');
-            if (kickPlayer) {
-                const controlBar = kickPlayer.querySelector('[class*="controlbar"]') ||
-                    kickPlayer.querySelector('[class*="control-bar"]');
-                if (controlBar && !controlBar.querySelector('.kickclient-record-btn')) {
-                    injectRecordButton(controlBar);
+            for (const selector of selectors) {
+                const container = document.querySelector(selector);
+                if (container && !container.querySelector('.kickclient-record-btn')) {
+                    console.log('KickClient: Found controls with selector:', selector);
+                    injectRecordButton(container);
+                    return true;
                 }
             }
+            return false;
+        };
+
+        // Try immediately
+        findAndInjectButton();
+
+        // Retry multiple times
+        const retryTimes = [500, 1000, 2000, 3000, 5000];
+        retryTimes.forEach(delay => {
+            setTimeout(findAndInjectButton, delay);
+        });
+
+        // Also use MutationObserver
+        const observer = new MutationObserver(() => {
+            findAndInjectButton();
         });
 
         observer.observe(document.body, {
             childList: true,
             subtree: true
         });
-
-        setTimeout(() => {
-            const existingControls = document.querySelector('[class*="bmpui-controlbar"]') ||
-                document.querySelector('[class*="player-controls"]');
-            if (existingControls && !existingControls.querySelector('.kickclient-record-btn')) {
-                injectRecordButton(existingControls);
-            }
-        }, 2000);
     }
 
     // Inject record button into player controls
     function injectRecordButton(controlsContainer) {
+        if (controlsContainer.querySelector('.kickclient-record-btn')) return;
+
         recordButton = document.createElement('button');
         recordButton.className = 'kickclient-record-btn';
         recordButton.innerHTML = `${ICONS.download} <span>Indir</span>`;
@@ -89,9 +147,12 @@
 
         recordButton.addEventListener('click', handleRecordClick);
 
+        // Try different insertion points
         const fullscreenBtn = controlsContainer.querySelector('[class*="fullscreen"]') ||
-            controlsContainer.querySelector('[aria-label*="fullscreen"]');
-        if (fullscreenBtn) {
+            controlsContainer.querySelector('[aria-label*="fullscreen"]') ||
+            controlsContainer.querySelector('[class*="Fullscreen"]');
+
+        if (fullscreenBtn && fullscreenBtn.parentNode) {
             fullscreenBtn.parentNode.insertBefore(recordButton, fullscreenBtn);
         } else {
             controlsContainer.appendChild(recordButton);
@@ -187,6 +248,7 @@
         const liveIndicator = document.querySelector('[class*="live-badge"]') ||
             document.querySelector('[class*="is-live"]') ||
             document.querySelector('[data-live="true"]') ||
+            document.querySelector('[class*="Live"]') ||
             document.querySelector('.live-indicator');
 
         const isVodUrl = window.location.href.includes('/video/') ||
@@ -197,13 +259,22 @@
 
     // Get stream URL from page
     async function getStreamUrl() {
+        // Method 1: Check video src
         const videos = document.querySelectorAll('video');
         for (const video of videos) {
             if (video.src && video.src.includes('.m3u8')) {
                 return video.src;
             }
+            // Check source elements
+            const sources = video.querySelectorAll('source');
+            for (const source of sources) {
+                if (source.src && source.src.includes('.m3u8')) {
+                    return source.src;
+                }
+            }
         }
 
+        // Method 2: Check scripts
         const scripts = document.querySelectorAll('script');
         for (const script of scripts) {
             const content = script.textContent;
@@ -215,6 +286,14 @@
             }
         }
 
+        // Method 3: Check for playback URL in page data
+        const pageContent = document.body.innerHTML;
+        const m3u8Match = pageContent.match(/(https?:\/\/[^"'\s<>]+\.m3u8[^"'\s<>]*)/);
+        if (m3u8Match) {
+            return m3u8Match[1];
+        }
+
+        // Method 4: Build from channel name
         const channelMatch = window.location.pathname.match(/^\/([^/]+)$/);
         if (channelMatch) {
             return `https://fa723fc1b171.us-west-2.playback.live-video.net/api/video/v1/us-west-2.${channelMatch[1]}/main/playlist.m3u8`;
@@ -227,7 +306,8 @@
     function getStreamName() {
         const titleEl = document.querySelector('[class*="stream-title"]') ||
             document.querySelector('h1') ||
-            document.querySelector('[data-testid="stream-title"]');
+            document.querySelector('[data-testid="stream-title"]') ||
+            document.querySelector('[class*="StreamTitle"]');
 
         if (titleEl) {
             return titleEl.textContent.trim().substring(0, 50);
@@ -384,14 +464,49 @@
 
     // Create settings button
     function createSettingsButton() {
-        const settingsBtn = document.createElement('button');
+        settingsBtn = document.createElement('button');
         settingsBtn.className = 'kickclient-settings-btn';
         settingsBtn.innerHTML = ICONS.settings;
-        settingsBtn.title = 'KickClient Ayarlar';
+        settingsBtn.title = 'KickClient Ayarlar (Cift tikla gizle)';
 
+        if (settingsHidden) {
+            settingsBtn.style.display = 'none';
+        }
+
+        // Single click - open settings
         settingsBtn.addEventListener('click', showSettingsModal);
 
+        // Double click - hide button
+        settingsBtn.addEventListener('dblclick', async (e) => {
+            e.stopPropagation();
+            settingsHidden = true;
+            settingsBtn.style.display = 'none';
+            await window.kickClient.saveSettings({
+                watermarkText,
+                discordRpcMode,
+                customDiscordStatus,
+                settingsHidden: true
+            });
+            showNotification('Ayarlar butonu gizlendi. Gostermek icin sayfayi yenileyin ve Ctrl+Shift+S basin.', 'info');
+        });
+
         document.body.appendChild(settingsBtn);
+
+        // Keyboard shortcut to show settings button
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'S') {
+                e.preventDefault();
+                settingsHidden = false;
+                settingsBtn.style.display = 'flex';
+                window.kickClient.saveSettings({
+                    watermarkText,
+                    discordRpcMode,
+                    customDiscordStatus,
+                    settingsHidden: false
+                });
+                showNotification('Ayarlar butonu gosterildi', 'success');
+            }
+        });
     }
 
     // Show settings modal
@@ -433,6 +548,11 @@
                     value="${discordStatus.customStatus || customDiscordStatus}" placeholder="Ozel durum yazin...">
             </div>
             
+            <p style="color: #666; font-size: 11px; margin-top: 16px;">
+                💡 Ayarlar butonunu gizlemek icin cift tiklayin.<br>
+                Gostermek icin: Ctrl+Shift+S
+            </p>
+            
             <div class="kickclient-modal-buttons">
                 <button class="kickclient-modal-btn secondary" id="settings-cancel">Iptal</button>
                 <button class="kickclient-modal-btn primary" id="settings-save">Kaydet</button>
@@ -472,7 +592,8 @@
             await window.kickClient.saveSettings({
                 watermarkText,
                 discordRpcMode: selectedMode,
-                customDiscordStatus: customText
+                customDiscordStatus: customText,
+                settingsHidden
             });
 
             await window.kickClient.discordSetMode({
