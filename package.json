@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "A specialized desktop client for Kick.com with live DVR recording and dynamic theming",
   "main": "main.js",
-  "author": "kelle",
+  "author": {
+    "name": "kelle",
+    "email": "kelle@kellecore.dev"
+  },
   "license": "MIT",
   "scripts": {
     "start": "electron .",
@@ -32,7 +35,7 @@
   "build": {
     "appId": "com.kelle.kickclient",
     "productName": "Kelle KickClient",
-    "copyright": "Copyright © 2024 kelle",
+    "copyright": "Copyright © 2025 kelle",
     "directories": {
       "output": "dist"
     },
@@ -75,6 +78,7 @@
       "category": "public.app-category.entertainment"
     },
     "linux": {
+      "maintainer": "kelle <kelle@kellecore.dev>",
       "target": [
         "AppImage",
         "deb"
