@@ -5,8 +5,15 @@ const fs = require('fs');
 const https = require('https');
 const http = require('http');
 const DiscordRPC = require('discord-rpc');
+const ffmpegStatic = require('ffmpeg-static');
 
-// Discord RPC Configuration
+// Configure FFmpeg path
+let ffmpegPath = ffmpegStatic;
+if (app.isPackaged) {
+    // When packaged, ffmpeg-static binary is inside app.asar.unpacked
+    ffmpegPath = ffmpegPath.replace('app.asar', 'app.asar.unpacked');
+}
+ffmpeg.setFfmpegPath(ffmpegPath);
 const DISCORD_CLIENT_ID = '1450511198750642357'; // Placeholder - user should create their own Discord app
 let rpcClient = null;
 let rpcConnected = false;

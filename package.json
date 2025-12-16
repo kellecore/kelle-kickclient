@@ -8,7 +8,7 @@
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
-    "build:win": "electron-builder --win --portable",
+    "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux"
   },
@@ -23,6 +23,7 @@
   "dependencies": {
     "discord-rpc": "^4.0.1",
     "electron": "^39.2.7",
+    "ffmpeg-static": "^5.3.0",
     "fluent-ffmpeg": "^2.1.3"
   },
   "devDependencies": {
@@ -42,6 +43,11 @@
       "styles.css",
       "assets/**/*",
       "package.json"
+    ],
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/bin/${os}/${arch}/ffmpeg",
+      "node_modules/ffmpeg-static/index.js",
+      "node_modules/ffmpeg-static/package.json"
     ],
     "win": {
       "target": [
