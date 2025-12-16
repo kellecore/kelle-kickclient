@@ -165,12 +165,18 @@ function createWindow() {
         }
     });
 
-    // Inject renderer script
+    // Inject renderer script only on Kick.com pages
     mainWindow.webContents.on('dom-ready', () => {
-        const rendererPath = path.join(__dirname, 'renderer.js');
-        if (fs.existsSync(rendererPath)) {
-            const rendererCode = fs.readFileSync(rendererPath, 'utf8');
-            mainWindow.webContents.executeJavaScript(rendererCode);
+        const currentUrl = mainWindow.webContents.getURL();
+        // Only inject on kick.com pages, not on Google/OAuth pages
+        if (currentUrl.includes('kick.com')) {
+            const rendererPath = path.join(__dirname, 'renderer.js');
+            if (fs.existsSync(rendererPath)) {
+                const rendererCode = fs.readFileSync(rendererPath, 'utf8');
+                mainWindow.webContents.executeJavaScript(rendererCode).catch(err => {
+                    console.error('Renderer script error:', err);
+                });
+            }
         }
     });
 
