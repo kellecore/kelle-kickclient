@@ -7,13 +7,22 @@ const http = require('http');
 const DiscordRPC = require('discord-rpc');
 const ffmpegStatic = require('ffmpeg-static');
 
-// Configure FFmpeg path
-let ffmpegPath = ffmpegStatic;
-if (app.isPackaged) {
-    // When packaged, ffmpeg-static binary is inside app.asar.unpacked
-    ffmpegPath = ffmpegPath.replace('app.asar', 'app.asar.unpacked');
+// Configure FFmpeg path (will be set after app is ready)
+function configureFfmpeg() {
+    try {
+        let ffmpegPath = ffmpegStatic;
+        if (ffmpegPath && app.isPackaged) {
+            ffmpegPath = ffmpegPath.replace('app.asar', 'app.asar.unpacked');
+        }
+        if (ffmpegPath) {
+            ffmpeg.setFfmpegPath(ffmpegPath);
+            console.log('FFmpeg path set:', ffmpegPath);
+        }
+    } catch (error) {
+        console.error('FFmpeg configuration error:', error);
+    }
 }
-ffmpeg.setFfmpegPath(ffmpegPath);
+
 const DISCORD_CLIENT_ID = '1450511198750642357'; // Placeholder - user should create their own Discord app
 let rpcClient = null;
 let rpcConnected = false;
@@ -187,16 +196,6 @@ function createWindow() {
             return { action: 'deny' };
         }
         return { action: 'allow' };
-    });
-
-    // Also handle navigation to OAuth URLs
-    mainWindow.webContents.on('will-navigate', (event, url) => {
-        if (url.includes('accounts.google.com') ||
-            url.includes('facebook.com/login') ||
-            url.includes('appleid.apple.com')) {
-            event.preventDefault();
-            shell.openExternal(url);
-        }
     });
 
     return mainWindow;
@@ -431,6 +430,9 @@ ipcMain.handle('save-settings', async (event, settings) => {
 
 // App lifecycle
 app.whenReady().then(async () => {
+    // Configure FFmpeg first
+    configureFfmpeg();
+
     createWindow();
 
     // Load saved settings and init Discord if needed

@@ -10,6 +10,7 @@
   "license": "MIT",
   "scripts": {
     "start": "electron .",
+    "dev": "electron .",
     "build": "electron-builder",
     "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
