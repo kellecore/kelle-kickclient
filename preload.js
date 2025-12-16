@@ -2,17 +2,22 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 // Expose protected methods to renderer process
 contextBridge.exposeInMainWorld('kickClient', {
-    // Recording controls
+    // Recording controls (Canli Yayin Indirme)
     startRecording: (options) => ipcRenderer.invoke('start-recording', options),
     stopRecording: (options) => ipcRenderer.invoke('stop-recording', options),
     getActiveRecordings: () => ipcRenderer.invoke('get-active-recordings'),
 
-    // VOD download
+    // VOD download (Arsiv Indirme)
     downloadVod: (options) => ipcRenderer.invoke('download-vod', options),
 
     // Settings
     getSettings: () => ipcRenderer.invoke('get-settings'),
     saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
+
+    // Discord RPC
+    discordSetMode: (options) => ipcRenderer.invoke('discord-rpc-set-mode', options),
+    discordGetStatus: () => ipcRenderer.invoke('discord-rpc-get-status'),
+    discordUpdateStreamer: (options) => ipcRenderer.invoke('discord-rpc-update-streamer', options),
 
     // Dialog
     showSaveDialog: (options) => ipcRenderer.invoke('show-save-dialog', options),
@@ -51,10 +56,10 @@ window.addEventListener('DOMContentLoaded', () => {
             justify-content: center;
             padding: 8px 12px;
             margin: 0 4px;
-            background: linear-gradient(135deg, #53FC18 0%, #9147FF 100%);
+            background: #53FC18;
             border: none;
             border-radius: 6px;
-            color: white;
+            color: #000;
             font-weight: 600;
             font-size: 12px;
             cursor: pointer;
@@ -64,11 +69,12 @@ window.addEventListener('DOMContentLoaded', () => {
         
         .kickclient-record-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(83, 252, 24, 0.4);
+            background: #4ae015;
         }
         
         .kickclient-record-btn.recording {
-            background: linear-gradient(135deg, #FF4444 0%, #CC0000 100%);
+            background: #FF4444;
+            color: white;
             animation: pulse 1.5s infinite;
         }
         
@@ -88,7 +94,7 @@ window.addEventListener('DOMContentLoaded', () => {
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -97,20 +103,19 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         
         .kickclient-modal {
-            background: linear-gradient(145deg, #1a1a2e, #16213e);
-            border: 1px solid #53FC18;
-            border-radius: 16px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
             padding: 24px;
             min-width: 320px;
             max-width: 450px;
-            box-shadow: 0 0 40px rgba(83, 252, 24, 0.2);
         }
         
         .kickclient-modal h2 {
-            color: #53FC18;
+            color: #fff;
             margin: 0 0 20px 0;
-            font-size: 20px;
-            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
         }
         
         .kickclient-quality-option {
@@ -118,20 +123,20 @@ window.addEventListener('DOMContentLoaded', () => {
             align-items: center;
             padding: 12px 16px;
             margin: 8px 0;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(83, 252, 24, 0.3);
+            background: #252525;
+            border: 1px solid #333;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s ease;
         }
         
         .kickclient-quality-option:hover {
-            background: rgba(83, 252, 24, 0.1);
+            background: #2a2a2a;
             border-color: #53FC18;
         }
         
         .kickclient-quality-option.selected {
-            background: rgba(83, 252, 24, 0.2);
+            background: rgba(83, 252, 24, 0.1);
             border-color: #53FC18;
         }
         
@@ -163,14 +168,13 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         
         .kickclient-modal-btn.primary {
-            background: linear-gradient(135deg, #53FC18 0%, #9147FF 100%);
-            color: white;
+            background: #53FC18;
+            color: #000;
         }
         
         .kickclient-modal-btn.secondary {
-            background: rgba(255, 255, 255, 0.1);
+            background: #333;
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
         .kickclient-modal-btn:hover {
@@ -182,9 +186,9 @@ window.addEventListener('DOMContentLoaded', () => {
             top: 20px;
             right: 20px;
             padding: 16px 24px;
-            background: linear-gradient(145deg, #1a1a2e, #16213e);
-            border: 1px solid #53FC18;
-            border-radius: 12px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
             color: white;
             z-index: 99998;
             animation: slideIn 0.3s ease;
@@ -210,8 +214,8 @@ window.addEventListener('DOMContentLoaded', () => {
             right: 20px;
             width: 50px;
             height: 50px;
-            background: linear-gradient(135deg, #53FC18 0%, #9147FF 100%);
-            border: none;
+            background: #1a1a1a;
+            border: 1px solid #333;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
@@ -219,17 +223,78 @@ window.addEventListener('DOMContentLoaded', () => {
             justify-content: center;
             z-index: 99990;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         
         .kickclient-settings-btn:hover {
-            transform: scale(1.1);
+            background: #252525;
+            border-color: #53FC18;
         }
         
         .kickclient-settings-btn svg {
             width: 24px;
             height: 24px;
-            fill: white;
+            fill: #53FC18;
+        }
+        
+        /* Discord RPC Toggle Styles */
+        .kickclient-toggle-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 16px 0;
+        }
+        
+        .kickclient-toggle-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #252525;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .kickclient-toggle-option:hover {
+            background: #2a2a2a;
+        }
+        
+        .kickclient-toggle-option.active {
+            background: rgba(83, 252, 24, 0.1);
+            border: 1px solid #53FC18;
+        }
+        
+        .kickclient-toggle-option input[type="radio"] {
+            margin-right: 12px;
+            accent-color: #53FC18;
+        }
+        
+        .kickclient-toggle-option label {
+            color: #fff;
+            cursor: pointer;
+        }
+        
+        .kickclient-section-title {
+            color: #888;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 20px 0 10px 0;
+        }
+        
+        .kickclient-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #252525;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .kickclient-input:focus {
+            border-color: #53FC18;
         }
     `;
     document.head.appendChild(style);
