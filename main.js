@@ -7,10 +7,10 @@ const http = require('http');
 const DiscordRPC = require('discord-rpc');
 
 // Discord RPC Configuration
-const DISCORD_CLIENT_ID = '1318999999999999999'; // Placeholder - user should create their own Discord app
+const DISCORD_CLIENT_ID = '1450511198750642357'; // Placeholder - user should create their own Discord app
 let rpcClient = null;
 let rpcConnected = false;
-let currentRpcMode = 'off'; // off, streamer, kick, custom
+let currentRpcMode = 'streamer'; // off, streamer, kick, custom
 let currentStreamerName = '';
 let customStatus = 'Kick izliyor';
 
@@ -392,7 +392,7 @@ ipcMain.handle('get-settings', async () => {
     }
     return {
         watermarkText: 'kelle',
-        discordRpcMode: 'off',
+        discordRpcMode: 'streamer',
         customDiscordStatus: 'Kick izliyor'
     };
 });
